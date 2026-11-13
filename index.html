@@ -238,152 +238,121 @@ footer {
 
 <script>
 
-// AUDIO FILES
+
+const audio = document.getElementById("audio");
+
 const sounds = {
     welcome: "welcome.mp3",
     start: "start.mp3",
     stop: "STOP.mp3"
 };
 
-// ELEMENTS
-const audio = document.getElementById("audio");
-
 const openButton = document.getElementById("openButton");
 const startButton = document.getElementById("startButton");
 const stopButton = document.getElementById("stopButton");
-
 const controls = document.getElementById("controls");
 const warning = document.getElementById("warning");
 const closeButton = document.getElementById("closeButton");
-
 const volumeSlider = document.getElementById("volumeSlider");
 const volumeValue = document.getElementById("volumeValue");
 
-// AUDIO SYSTEM
 let audioContext = null;
 let gainNode = null;
 let sourceNode = null;
-
 let welcomePlayed = false;
 let warningTimer = null;
 
-// INITIALIZE AUDIO
-function setupAudio() {
-
+// Initialize audio and WAIT until it is running
+async function setupAudio() {
     if (!audioContext) {
-
-        const AudioContextClass =
+        const AudioClass =
             window.AudioContext || window.webkitAudioContext;
 
-        if (!AudioContextClass) return;
+        if (AudioClass) {
+            audioContext = new AudioClass();
 
-        audioContext = new AudioContextClass();
+            sourceNode = audioContext.createMediaElementSource(audio);
+            gainNode = audioContext.createGain();
 
-        sourceNode = audioContext.createMediaElementSource(audio);
-
-        gainNode = audioContext.createGain();
-
-        sourceNode.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        updateVolume();
+            sourceNode.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+        }
     }
 
-    if (audioContext.state === "suspended") {
-        audioContext.resume();
+    if (audioContext && audioContext.state !== "running") {
+        await audioContext.resume();
     }
+
+    updateVolume();
 }
 
-// VOLUME
+// Volume control
 function updateVolume() {
-
     const volume = Number(volumeSlider.value);
-
     volumeValue.textContent = volume + "%";
 
     if (gainNode) {
         gainNode.gain.value = volume / 100;
+    } else {
+        audio.volume = Math.min(volume / 100, 1);
     }
 }
 
 volumeSlider.addEventListener("input", updateVolume);
 
-// PLAY SOUND
+// Play audio
 async function playSound(file) {
-
-    setupAudio();
-
-    if (audioContext && audioContext.state === "suspended") {
-        audioContext.resume();
-    }
-
-    // Build the correct URL from the website address
-    const soundURL = new URL(file, window.location.href).href;
-
-    audio.pause();
-    audio.currentTime = 0;
-
-    audio.src = soundURL;
-    audio.load();
-
     try {
+        await setupAudio();
+
+        audio.pause();
+        audio.currentTime = 0;
+
+        audio.src = new URL(file, document.baseURI).href;
+        audio.load();
+
         await audio.play();
+
         return true;
 
     } catch (error) {
-
-        console.error("Sound playback error:", error);
-
+        console.error("Audio playback failed:", error);
+        alert("Sound error: " + error.message);
         return false;
     }
 }
 
-// WELCOME SOUND - ONCE PER VISIT
+// Welcome sound: first user interaction
 async function playWelcome() {
-
     if (welcomePlayed) return;
 
-    const played = await playSound(sounds.welcome);
+    const success = await playSound(sounds.welcome);
 
-    if (played) {
+    if (success) {
         welcomePlayed = true;
     }
 }
 
-// TRY AUTOPLAY WHEN PAGE LOADS
-window.addEventListener("load", () => {
-    playWelcome();
-});
-
-// OPEN CONTROL
+// Open controls
 openButton.addEventListener("click", async () => {
-
-    setupAudio();
+    await setupAudio();
 
     controls.style.display = "flex";
     openButton.style.display = "none";
 
-    // Retry welcome if autoplay was blocked
     if (!welcomePlayed) {
         await playWelcome();
     }
 });
 
-// START BUTTON
+// START
 startButton.addEventListener("click", async () => {
-
-    setupAudio();
-
     warning.style.display = "none";
-
     await playSound(sounds.start);
 });
 
-// STOP BUTTON
+// STOP
 stopButton.addEventListener("click", async () => {
-
-    setupAudio();
-
     await playSound(sounds.stop);
 
     warning.style.display = "flex";
@@ -392,22 +361,18 @@ stopButton.addEventListener("click", async () => {
     clearTimeout(warningTimer);
 
     warningTimer = setTimeout(() => {
-
         closeButton.style.display = "inline-block";
-
     }, 20000);
 });
 
-// CLOSE WARNING
+// CLOSE
 closeButton.addEventListener("click", () => {
-
     clearTimeout(warningTimer);
 
     audio.pause();
     audio.currentTime = 0;
 
     warning.style.display = "none";
-
     closeButton.style.display = "none";
 
     controls.style.display = "none";
