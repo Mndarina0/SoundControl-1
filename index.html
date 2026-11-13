@@ -15,81 +15,135 @@ body {
     margin: 0;
     min-height: 100vh;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg,#00152e,#0754a8,#00152e);
+    background: radial-gradient(circle at center, #073c78, #001329 75%);
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
+/* FLOATING EMOJIS */
+.emoji {
+    position: fixed;
+    bottom: -70px;
+    font-size: 30px;
+    opacity: .65;
+    pointer-events: none;
+    animation: floatUp linear infinite;
+    z-index: 0;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+    15% { opacity: .7; }
+    85% { opacity: .7; }
+    100% {
+        transform: translateY(-115vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* MAIN BOX */
 .container {
+    position: relative;
+    z-index: 2;
     width: 90%;
-    max-width: 500px;
-    padding: 30px;
+    max-width: 550px;
+    padding: 35px 25px;
     text-align: center;
-    background: rgba(0,15,40,.8);
-    border: 1px solid rgba(255,255,255,.2);
+    background: rgba(0, 15, 40, .88);
+    border: 1px solid rgba(70, 180, 255, .5);
     border-radius: 25px;
-    box-shadow: 0 0 35px rgba(0,150,255,.35);
+    box-shadow: 0 0 35px rgba(0, 140, 255, .35);
+    backdrop-filter: blur(12px);
 }
 
 h1 {
     font-size: 32px;
     letter-spacing: 3px;
+    margin: 5px 0 10px;
+    text-shadow: 0 0 15px #168dff;
 }
 
 .subtitle {
     color: #a9d8ff;
-    margin-bottom: 30px;
+    margin-bottom: 28px;
 }
 
-.main-button {
+/* OPEN BUTTON */
+.open-button {
     width: 100%;
-    padding: 22px;
-    border: 1px solid #42b5ff;
+    padding: 20px;
+    border: 1px solid #48baff;
     border-radius: 15px;
-    background: linear-gradient(135deg,#0876d1,#003d83);
+    background: linear-gradient(135deg, #0876d1, #003d83);
     color: white;
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
+    box-shadow: 0 0 18px rgba(0, 140, 255, .4);
+    transition: .25s;
 }
 
-.main-button:hover {
-    transform: scale(1.03);
-    box-shadow: 0 0 25px #168dff;
+.open-button:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0 28px #168dff;
 }
 
+/* GAME BUTTONS */
 .controls {
     display: none;
-    margin-top: 25px;
-    gap: 15px;
-    flex-direction: column;
+    margin-top: 35px;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
 }
 
-.control-button {
-    padding: 18px;
-    border: none;
-    border-radius: 12px;
+.buzzer {
+    width: 145px;
+    height: 145px;
+    border-radius: 50%;
+    border: 7px solid rgba(255,255,255,.25);
     color: white;
-    font-size: 19px;
-    font-weight: bold;
+    font-size: 21px;
+    font-weight: 900;
     cursor: pointer;
+    text-shadow: 0 2px 5px rgba(0,0,0,.5);
+    transition: .15s;
+    box-shadow:
+        0 9px 0 rgba(0,0,0,.35),
+        0 0 25px rgba(255,255,255,.12);
+}
+
+.buzzer:active {
+    transform: translateY(7px) scale(.96);
+    box-shadow: 0 2px 0 rgba(0,0,0,.35);
 }
 
 .start {
-    background: #087d38;
+    background: radial-gradient(circle at 35% 25%, #51c5ff, #0064d9 65%, #003b91);
+    box-shadow:
+        0 9px 0 #002c69,
+        0 0 30px rgba(0,130,255,.5);
 }
 
 .stop {
-    background: #b60020;
+    background: radial-gradient(circle at 35% 25%, #ff7777, #df1010 65%, #850000);
+    box-shadow:
+        0 9px 0 #690000,
+        0 0 30px rgba(255,0,0,.4);
 }
 
+/* VOLUME */
 .volume-box {
-    margin-top: 30px;
+    margin-top: 35px;
     padding: 18px;
-    background: rgba(255,255,255,.07);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
     border-radius: 15px;
 }
 
@@ -101,8 +155,8 @@ h1 {
 
 input[type="range"] {
     width: 100%;
-    cursor: pointer;
     accent-color: #21a5ff;
+    cursor: pointer;
 }
 
 #volumeValue {
@@ -110,13 +164,19 @@ input[type="range"] {
     font-weight: bold;
 }
 
+footer {
+    margin-top: 25px;
+    color: #8ebce5;
+    font-size: 12px;
+}
+
+/* WARNING SCREEN */
 .warning {
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 10;
+    z-index: 20;
     background: #080808;
-    color: white;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -130,6 +190,12 @@ input[type="range"] {
 .warning-icon {
     color: red;
     font-size: 100px;
+    animation: warningPulse 1s infinite alternate;
+}
+
+@keyframes warningPulse {
+    from { opacity: .5; transform: scale(.95); }
+    to { opacity: 1; transform: scale(1.08); }
 }
 
 .warning h1 {
@@ -145,7 +211,6 @@ input[type="range"] {
 .warning p {
     color: #ddd;
     line-height: 1.7;
-    font-size: 17px;
 }
 
 .close-button {
@@ -160,33 +225,49 @@ input[type="range"] {
     cursor: pointer;
 }
 
-footer {
-    margin-top: 25px;
-    color: #8ebce5;
-    font-size: 12px;
+@media(max-width: 420px) {
+    .buzzer {
+        width: 115px;
+        height: 115px;
+        font-size: 18px;
+    }
+
+    .controls {
+        gap: 18px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<!-- FLOATING EMOJIS -->
+<div class="emoji" style="left:5%;animation-duration:13s">🎮</div>
+<div class="emoji" style="left:18%;animation-duration:17s;animation-delay:2s">⚡</div>
+<div class="emoji" style="left:33%;animation-duration:15s;animation-delay:4s">🔥</div>
+<div class="emoji" style="left:48%;animation-duration:19s;animation-delay:1s">🎯</div>
+<div class="emoji" style="left:63%;animation-duration:14s;animation-delay:3s">🎵</div>
+<div class="emoji" style="left:78%;animation-duration:18s;animation-delay:5s">🚀</div>
+<div class="emoji" style="left:91%;animation-duration:16s;animation-delay:2s">⭐</div>
 
-    <h1>SOUND CONTROL</h1>
+<!-- MAIN CONTAINER -->
+<div class="container" id="mainContainer">
+
+    <h1>🎮 SOUND CONTROL</h1>
     <p class="subtitle">Advanced Audio Control System</p>
 
-    <button class="main-button" id="openButton">
+    <button class="open-button" id="openButton">
         OPEN CONTROL
     </button>
 
     <div class="controls" id="controls">
 
-        <button class="control-button start" id="startButton">
-            ▶ START
+        <button class="buzzer start" id="startButton">
+            START
         </button>
 
-        <button class="control-button stop" id="stopButton">
-            ■ STOP
+        <button class="buzzer stop" id="stopButton">
+            STOP
         </button>
 
     </div>
@@ -210,6 +291,7 @@ footer {
 
 </div>
 
+<!-- WARNING -->
 <div class="warning" id="warning">
 
     <div class="warning-content">
@@ -238,37 +320,45 @@ footer {
 
 <script>
 
-
-const audio = document.getElementById("audio");
-
+// SOUND FILES
 const sounds = {
     welcome: "welcome.mp3",
     start: "start.mp3",
     stop: "STOP.mp3"
 };
 
+// ELEMENTS
+const audio = document.getElementById("audio");
+
 const openButton = document.getElementById("openButton");
 const startButton = document.getElementById("startButton");
 const stopButton = document.getElementById("stopButton");
+
 const controls = document.getElementById("controls");
 const warning = document.getElementById("warning");
 const closeButton = document.getElementById("closeButton");
+
 const volumeSlider = document.getElementById("volumeSlider");
 const volumeValue = document.getElementById("volumeValue");
 
+// AUDIO SYSTEM
 let audioContext = null;
 let gainNode = null;
 let sourceNode = null;
+
 let welcomePlayed = false;
 let warningTimer = null;
 
-// Initialize audio and WAIT until it is running
+// SETUP AUDIO
 async function setupAudio() {
+
     if (!audioContext) {
+
         const AudioClass =
             window.AudioContext || window.webkitAudioContext;
 
         if (AudioClass) {
+
             audioContext = new AudioClass();
 
             sourceNode = audioContext.createMediaElementSource(audio);
@@ -286,23 +376,27 @@ async function setupAudio() {
     updateVolume();
 }
 
-// Volume control
+// VOLUME
 function updateVolume() {
+
     const volume = Number(volumeSlider.value);
+
     volumeValue.textContent = volume + "%";
 
     if (gainNode) {
         gainNode.gain.value = volume / 100;
     } else {
-        audio.volume = Math.min(volume / 100, 1);
+        audio.volume = 1;
     }
 }
 
 volumeSlider.addEventListener("input", updateVolume);
 
-// Play audio
+// PLAY SOUND
 async function playSound(file) {
+
     try {
+
         await setupAudio();
 
         audio.pause();
@@ -316,14 +410,17 @@ async function playSound(file) {
         return true;
 
     } catch (error) {
-        console.error("Audio playback failed:", error);
+
+        console.error("Audio error:", error);
         alert("Sound error: " + error.message);
+
         return false;
     }
 }
 
-// Welcome sound: first user interaction
+// WELCOME SOUND
 async function playWelcome() {
+
     if (welcomePlayed) return;
 
     const success = await playSound(sounds.welcome);
@@ -333,8 +430,9 @@ async function playWelcome() {
     }
 }
 
-// Open controls
+// OPEN CONTROL
 openButton.addEventListener("click", async () => {
+
     await setupAudio();
 
     controls.style.display = "flex";
@@ -347,12 +445,15 @@ openButton.addEventListener("click", async () => {
 
 // START
 startButton.addEventListener("click", async () => {
+
     warning.style.display = "none";
+
     await playSound(sounds.start);
 });
 
 // STOP
 stopButton.addEventListener("click", async () => {
+
     await playSound(sounds.stop);
 
     warning.style.display = "flex";
@@ -367,6 +468,7 @@ stopButton.addEventListener("click", async () => {
 
 // CLOSE
 closeButton.addEventListener("click", () => {
+
     clearTimeout(warningTimer);
 
     audio.pause();
