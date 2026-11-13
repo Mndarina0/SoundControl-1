@@ -1,212 +1,229 @@
 
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sound Control</title>
 
 <style>
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
     min-height: 100vh;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg,#00152e,#0754a5,#001d48);
+    background: linear-gradient(135deg, #00152e, #0754a8, #00152e);
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 25px 0;
-    color: white;
+    overflow-x: hidden;
 }
 
 .container {
     width: 90%;
-    max-width: 430px;
+    max-width: 500px;
     text-align: center;
+    padding: 30px;
+    background: rgba(0, 15, 40, 0.75);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 25px;
+    box-shadow: 0 0 35px rgba(0,150,255,.35);
+}
+
+h1 {
+    font-size: 32px;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
 }
 
 .subtitle {
-    color: #bce4ff;
-    letter-spacing: 2px;
+    color: #a9d8ff;
+    margin-bottom: 30px;
 }
 
-h2 { margin: 20px 0; }
-
-.main-box {
-    background: rgba(255,255,255,.12);
-    border: 2px solid rgba(255,255,255,.3);
-    border-radius: 22px;
-    padding: 35px 20px;
+.main-button {
+    width: 100%;
+    padding: 22px;
+    border: 1px solid #42b5ff;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #0876d1, #003d83);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 0 35px #008cff4d;
-    transition: .25s;
+    transition: .3s;
 }
 
-.main-box:hover {
+.main-button:hover {
     transform: scale(1.04);
-    box-shadow: 0 0 45px #168cff;
-}
-
-.main-box h1 {
-    font-size: 35px;
-    margin: 0;
+    box-shadow: 0 0 25px #168dff;
 }
 
 .controls {
     display: none;
     margin-top: 25px;
     gap: 15px;
+    flex-direction: column;
 }
 
-.controls.show { display: flex; }
-
-.btn {
-    flex: 1;
-    border: none;
-    padding: 17px 10px;
-    border-radius: 14px;
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-}
-
-.btn small {
-    display: block;
-    font-size: 13px;
-    margin-top: 6px;
-}
-
-.start { background: #087bff; }
-.stop { background: #e62940; }
-
-.volume {
-    margin-top: 25px;
-    background: rgba(255,255,255,.10);
+.control-button {
     padding: 18px;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 19px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.control-button:hover {
+    transform: scale(1.03);
+}
+
+.start {
+    background: #087d38;
+    box-shadow: 0 0 15px rgba(0,255,100,.2);
+}
+
+.stop {
+    background: #b60020;
+    box-shadow: 0 0 15px rgba(255,0,40,.2);
+}
+
+.volume-box {
+    margin-top: 30px;
+    padding: 18px;
+    background: rgba(255,255,255,.07);
     border-radius: 15px;
 }
 
-.volume input {
-    width: 100%;
-    margin-top: 12px;
-    accent-color: #16a0ff;
+.volume-box label {
+    display: block;
+    margin-bottom: 15px;
+    font-weight: bold;
 }
 
-.volume span {
-    color: #8dffbd;
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+    accent-color: #21a5ff;
+}
+
+#volumeValue {
+    color: #55bdff;
     font-weight: bold;
-    font-size: 20px;
 }
 
 .warning {
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 9999;
-    background: #050000;
-    align-items: center;
+    z-index: 10;
+    background: #080808;
+    color: white;
     justify-content: center;
+    align-items: center;
     text-align: center;
     padding: 20px;
 }
 
-.warning.show { display: flex; }
-
 .warning-content {
-    width: 100%;
-    animation: flash .7s infinite alternate;
+    max-width: 600px;
 }
 
 .warning-icon {
-    font-size: clamp(130px,30vw,280px);
     color: red;
-    line-height: 1;
-    text-shadow: 0 0 35px red;
+    font-size: 100px;
+    margin: 0;
 }
 
 .warning h1 {
-    font-size: clamp(55px,13vw,130px);
     color: red;
-    margin: 15px 0;
-    letter-spacing: 5px;
+    font-size: 45px;
 }
 
 .warning h2 {
-    color: white;
-    font-size: clamp(20px,5vw,40px);
+    color: #ff3333;
+    letter-spacing: 4px;
 }
 
 .warning p {
-    color: #ff3030;
-    font-size: clamp(22px,5vw,42px);
-    font-weight: bold;
+    color: #ddd;
+    line-height: 1.7;
+    font-size: 17px;
 }
 
-@keyframes flash {
-    from { opacity: 1; }
-    to { opacity: .55; }
-}
-
-.close-warning {
+.close-button {
     display: none;
-    background: #e00000;
+    margin-top: 25px;
+    padding: 15px 45px;
+    border: 1px solid red;
+    border-radius: 10px;
+    background: #b00020;
     color: white;
-    border: 2px solid white;
-    border-radius: 12px;
-    padding: 15px 40px;
-    font-size: 20px;
-    font-weight: bold;
+    font-size: 18px;
     cursor: pointer;
 }
 
-.close-warning.visible { display: inline-block; }
+footer {
+    margin-top: 25px;
+    color: #8ebce5;
+    font-size: 12px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="container" id="mainContainer">
 
-    <div class="subtitle">🔊 SOUND CONTROL</div>
+    <h1>SOUND CONTROL</h1>
+    <p class="subtitle">Advanced Audio Control System</p>
 
-    <h2>اضغط على الصندوق</h2>
-
-    <div class="main-box" id="mainBox">
-        <h1>📦 اضغط هنا</h1>
-    </div>
+    <button class="main-button" id="openButton">
+        OPEN CONTROL
+    </button>
 
     <div class="controls" id="controls">
 
-        <button class="btn stop" id="stopBtn">
-            ⏹ إيقاف
-            <small>STOP</small>
+        <button class="control-button start" id="startButton">
+            ▶ START
         </button>
 
-        <button class="btn start" id="startBtn">
-            ▶ تشغيل
-            <small>START</small>
+        <button class="control-button stop" id="stopButton">
+            ■ STOP
         </button>
 
     </div>
 
-    <div class="volume">
-        <div>🔊 مستوى الصوت</div>
+    <div class="volume-box">
+        <label>
+            VOLUME: <span id="volumeValue">100%</span>
+        </label>
 
-        <input type="range"
-               id="volume"
-               min="100"
-               max="200"
-               value="100">
-
-        <span id="volumeValue">100%</span>
+        <input
+            type="range"
+            id="volumeSlider"
+            min="100"
+            max="200"
+            value="100"
+            step="1"
+        >
     </div>
+
+    <footer>
+        SOUND CONTROL SYSTEM © 2026
+    </footer>
 
 </div>
 
 <div class="warning" id="warning">
+
     <div class="warning-content">
 
         <div class="warning-icon">⚠</div>
@@ -215,184 +232,191 @@ h2 { margin: 20px 0; }
 
         <h2>EXTREME CAUTION</h2>
 
-        <p>PLEASE BE CAREFUL!</p>
+        <p>
+            THE SYSTEM HAS BEEN STOPPED.
+            <br>
+            PLEASE WAIT BEFORE CLOSING THIS SCREEN.
+        </p>
 
-        <button id="closeWarningBtn"
-                class="close-warning">
+        <button class="close-button" id="closeButton">
             CLOSE
         </button>
 
     </div>
+
 </div>
 
 <audio id="audio" preload="auto"></audio>
 
 <script>
+const audio = document.getElementById("audio");
 
-// أصوات الموقع المشتركة لجميع الزوار
 const sounds = {
-    welcome: "sounds/welcome.mp3",
-    start: "sounds/start.mp3",
-    stop: "sounds/stop.mp3"
+    welcome: "welcome.mp3",
+    start: "start.mp3",
+    stop: "STOP.mp3"
 };
 
-const audio = document.getElementById("audio");
-const warning = document.getElementById("warning");
+const openButton = document.getElementById("openButton");
+const startButton = document.getElementById("startButton");
+const stopButton = document.getElementById("stopButton");
 const controls = document.getElementById("controls");
-const volume = document.getElementById("volume");
+const warning = document.getElementById("warning");
+const closeButton = document.getElementById("closeButton");
+
+const volumeSlider = document.getElementById("volumeSlider");
+const volumeValue = document.getElementById("volumeValue");
 
 let audioContext = null;
-let audioSource = null;
-let audioGain = null;
+let gainNode = null;
+let sourceNode = null;
+
+let welcomePlayed = false;
+let welcomeAttempted = false;
 let warningTimer = null;
 
-function setupVolumeBoost() {
-    if (audioContext) return;
+// Audio amplification
+function setupAudio() {
 
-    const AudioContextClass =
-        window.AudioContext || window.webkitAudioContext;
+    if (!audioContext) {
 
-    if (!AudioContextClass) return;
+        const AudioContextClass =
+            window.AudioContext || window.webkitAudioContext;
 
-    audioContext = new AudioContextClass();
+        if (!AudioContextClass) return;
 
-    audioSource =
-        audioContext.createMediaElementSource(audio);
+        audioContext = new AudioContextClass();
 
-    audioGain = audioContext.createGain();
+        sourceNode = audioContext.createMediaElementSource(audio);
 
-    audioSource.connect(audioGain);
-    audioGain.connect(audioContext.destination);
+        gainNode = audioContext.createGain();
 
-    audio.volume = 1;
-    audioGain.gain.value = Number(volume.value) / 100;
-}
+        sourceNode.connect(gainNode);
+        gainNode.connect(audioContext.destination);
 
-async function unlockAudio() {
-    setupVolumeBoost();
-
-    if (audioContext &&
-        audioContext.state === "suspended") {
-        await audioContext.resume();
-    }
-}
-
-function playSound(soundPath) {
-    audio.pause();
-    audio.currentTime = 0;
-    audio.src = soundPath;
-    audio.volume = 1;
-
-    if (audioGain) {
-        audioGain.gain.value = Number(volume.value) / 100;
+        updateVolume();
     }
 
-    audio.play().catch(() => {
-        console.log("تعذر التشغيل، اضغط على الصفحة أولاً.");
-    });
-}
-
-// مستوى الصوت من 100 إلى 200
-const savedVolume = Number(
-    localStorage.getItem("savedBoost") || 100
-);
-
-volume.value = Math.max(100, Math.min(200, savedVolume));
-
-document.getElementById("volumeValue").textContent =
-    volume.value + "%";
-
-volume.addEventListener("input", function() {
-    const value = Math.max(100, Math.min(200, Number(this.value)));
-
-    this.value = value;
-
-    document.getElementById("volumeValue").textContent =
-        value + "%";
-
-    localStorage.setItem("savedBoost", value);
-
-    setupVolumeBoost();
-
-    if (audioGain) {
-        audioGain.gain.value = value / 100;
-    }
-});
-
-// فتح الصندوق
-document.getElementById("mainBox").onclick = function() {
-    controls.classList.add("show");
-};
-
-// تشغيل صوت START
-document.getElementById("startBtn").onclick = async function() {
-    await unlockAudio();
-
-    clearTimeout(warningTimer);
-
-    warning.classList.remove("show");
-
-    document.getElementById("closeWarningBtn")
-        .classList.remove("visible");
-
-    playSound(sounds.start);
-};
-
-// تشغيل صوت STOP وإظهار التحذير
-document.getElementById("stopBtn").onclick = async function() {
-    await unlockAudio();
-
-    playSound(sounds.stop);
-
-    warning.classList.add("show");
-
-    const closeBtn =
-        document.getElementById("closeWarningBtn");
-
-    closeBtn.classList.remove("visible");
-
-    clearTimeout(warningTimer);
-
-    warningTimer = setTimeout(function() {
-        closeBtn.classList.add("visible");
-    }, 20000);
-
-    if (!document.fullscreenElement) {
-        document.documentElement
-            .requestFullscreen?.()
-            .catch(() => {});
-    }
-};
-
-// إغلاق التحذير
-document.getElementById("closeWarningBtn").onclick = function() {
-    clearTimeout(warningTimer);
-
-    audio.pause();
-    audio.currentTime = 0;
-    audio.removeAttribute("src");
-    audio.load();
-
-    warning.classList.remove("show");
-
-    this.classList.remove("visible");
-
-    if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {});
-    }
-};
-
-// صوت الدخول
-window.addEventListener("load", function() {
-    playSound(sounds.welcome);
-});
-
-// محاولة تشغيل الصوت عند أول تفاعل إذا منع المتصفح التشغيل التلقائي
-document.addEventListener("pointerdown", function() {
-    if (audioContext && audioContext.state === "suspended") {
+    if (audioContext.state === "suspended") {
         audioContext.resume();
     }
-}, { once: true });
+}
+
+// Volume 100% - 200%
+function updateVolume() {
+
+    const volume = Number(volumeSlider.value);
+
+    volumeValue.textContent = volume + "%";
+
+    if (gainNode) {
+        gainNode.gain.value = volume / 100;
+    }
+}
+
+volumeSlider.addEventListener("input", updateVolume);
+
+// Play sound
+async function playSound(file) {
+
+    setupAudio();
+
+    audio.pause();
+    audio.currentTime = 0;
+
+    audio.src = file;
+    audio.load();
+
+    try {
+        await audio.play();
+    } catch (error) {
+        console.log("Audio playback blocked or unavailable:", error);
+    }
+}
+
+// Welcome sound: once per page visit
+async function playWelcome() {
+
+    if (welcomePlayed || welcomeAttempted) return;
+
+    welcomeAttempted = true;
+
+    setupAudio();
+
+    audio.src = sounds.welcome;
+    audio.load();
+
+    try {
+        await audio.play();
+        welcomePlayed = true;
+    } catch (error) {
+        // Browser may block autoplay.
+        // The user can retry by clicking OPEN CONTROL.
+        welcomeAttempted = false;
+    }
+}
+
+// Try autoplay when the page loads
+window.addEventListener("load", () => {
+    playWelcome();
+});
+
+// Open controls
+openButton.addEventListener("click", async () => {
+
+    setupAudio();
+
+    if (!welcomePlayed && !welcomeAttempted) {
+        await playWelcome();
+    }
+
+    controls.style.display = "flex";
+    openButton.style.display = "none";
+});
+
+// START
+startButton.addEventListener("click", () => {
+
+    setupAudio();
+
+    warning.style.display = "none";
+
+    playSound(sounds.start);
+});
+
+// STOP
+stopButton.addEventListener("click", async () => {
+
+    setupAudio();
+
+    await playSound(sounds.stop);
+
+    warning.style.display = "flex";
+
+    closeButton.style.display = "none";
+
+    clearTimeout(warningTimer);
+
+    warningTimer = setTimeout(() => {
+        closeButton.style.display = "inline-block";
+    }, 20000);
+});
+
+// CLOSE warning
+closeButton.addEventListener("click", () => {
+
+    clearTimeout(warningTimer);
+
+    audio.pause();
+    audio.currentTime = 0;
+
+    warning.style.display = "none";
+
+    closeButton.style.display = "none";
+
+    controls.style.display = "none";
+    openButton.style.display = "block";
+});
 
 </script>
 
