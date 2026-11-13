@@ -15,7 +15,7 @@ body {
     margin: 0;
     min-height: 100vh;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #00152e, #0754a8, #00152e);
+    background: linear-gradient(135deg,#00152e,#0754a8,#00152e);
     color: white;
     display: flex;
     justify-content: center;
@@ -26,9 +26,9 @@ body {
 .container {
     width: 90%;
     max-width: 500px;
-    text-align: center;
     padding: 30px;
-    background: rgba(0, 15, 40, 0.75);
+    text-align: center;
+    background: rgba(0,15,40,.8);
     border: 1px solid rgba(255,255,255,.2);
     border-radius: 25px;
     box-shadow: 0 0 35px rgba(0,150,255,.35);
@@ -37,7 +37,6 @@ body {
 h1 {
     font-size: 32px;
     letter-spacing: 3px;
-    margin-bottom: 10px;
 }
 
 .subtitle {
@@ -50,16 +49,15 @@ h1 {
     padding: 22px;
     border: 1px solid #42b5ff;
     border-radius: 15px;
-    background: linear-gradient(135deg, #0876d1, #003d83);
+    background: linear-gradient(135deg,#0876d1,#003d83);
     color: white;
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
-    transition: .3s;
 }
 
 .main-button:hover {
-    transform: scale(1.04);
+    transform: scale(1.03);
     box-shadow: 0 0 25px #168dff;
 }
 
@@ -78,21 +76,14 @@ h1 {
     font-size: 19px;
     font-weight: bold;
     cursor: pointer;
-    transition: .2s;
-}
-
-.control-button:hover {
-    transform: scale(1.03);
 }
 
 .start {
     background: #087d38;
-    box-shadow: 0 0 15px rgba(0,255,100,.2);
 }
 
 .stop {
     background: #b60020;
-    box-shadow: 0 0 15px rgba(255,0,40,.2);
 }
 
 .volume-box {
@@ -139,7 +130,6 @@ input[type="range"] {
 .warning-icon {
     color: red;
     font-size: 100px;
-    margin: 0;
 }
 
 .warning h1 {
@@ -180,7 +170,7 @@ footer {
 
 <body>
 
-<div class="container" id="mainContainer">
+<div class="container">
 
     <h1>SOUND CONTROL</h1>
     <p class="subtitle">Advanced Audio Control System</p>
@@ -216,9 +206,7 @@ footer {
         >
     </div>
 
-    <footer>
-        SOUND CONTROL SYSTEM © 2026
-    </footer>
+    <footer>SOUND CONTROL SYSTEM © 2026</footer>
 
 </div>
 
@@ -249,17 +237,21 @@ footer {
 <audio id="audio" preload="auto"></audio>
 
 <script>
-const audio = document.getElementById("audio");
 
+// AUDIO FILES
 const sounds = {
     welcome: "welcome.mp3",
     start: "start.mp3",
     stop: "STOP.mp3"
 };
 
+// ELEMENTS
+const audio = document.getElementById("audio");
+
 const openButton = document.getElementById("openButton");
 const startButton = document.getElementById("startButton");
 const stopButton = document.getElementById("stopButton");
+
 const controls = document.getElementById("controls");
 const warning = document.getElementById("warning");
 const closeButton = document.getElementById("closeButton");
@@ -267,15 +259,15 @@ const closeButton = document.getElementById("closeButton");
 const volumeSlider = document.getElementById("volumeSlider");
 const volumeValue = document.getElementById("volumeValue");
 
+// AUDIO SYSTEM
 let audioContext = null;
 let gainNode = null;
 let sourceNode = null;
 
 let welcomePlayed = false;
-let welcomeAttempted = false;
 let warningTimer = null;
 
-// Audio amplification
+// INITIALIZE AUDIO
 function setupAudio() {
 
     if (!audioContext) {
@@ -302,7 +294,7 @@ function setupAudio() {
     }
 }
 
-// Volume 100% - 200%
+// VOLUME
 function updateVolume() {
 
     const volume = Number(volumeSlider.value);
@@ -316,75 +308,78 @@ function updateVolume() {
 
 volumeSlider.addEventListener("input", updateVolume);
 
-// Play sound
+// PLAY SOUND
 async function playSound(file) {
 
     setupAudio();
 
+    if (audioContext && audioContext.state === "suspended") {
+        audioContext.resume();
+    }
+
+    // Build the correct URL from the website address
+    const soundURL = new URL(file, window.location.href).href;
+
     audio.pause();
     audio.currentTime = 0;
 
-    audio.src = file;
+    audio.src = soundURL;
     audio.load();
 
     try {
         await audio.play();
+        return true;
+
     } catch (error) {
-        console.log("Audio playback blocked or unavailable:", error);
+
+        console.error("Sound playback error:", error);
+
+        return false;
     }
 }
 
-// Welcome sound: once per page visit
+// WELCOME SOUND - ONCE PER VISIT
 async function playWelcome() {
 
-    if (welcomePlayed || welcomeAttempted) return;
+    if (welcomePlayed) return;
 
-    welcomeAttempted = true;
+    const played = await playSound(sounds.welcome);
 
-    setupAudio();
-
-    audio.src = sounds.welcome;
-    audio.load();
-
-    try {
-        await audio.play();
+    if (played) {
         welcomePlayed = true;
-    } catch (error) {
-        // Browser may block autoplay.
-        // The user can retry by clicking OPEN CONTROL.
-        welcomeAttempted = false;
     }
 }
 
-// Try autoplay when the page loads
+// TRY AUTOPLAY WHEN PAGE LOADS
 window.addEventListener("load", () => {
     playWelcome();
 });
 
-// Open controls
+// OPEN CONTROL
 openButton.addEventListener("click", async () => {
 
     setupAudio();
 
-    if (!welcomePlayed && !welcomeAttempted) {
-        await playWelcome();
-    }
-
     controls.style.display = "flex";
     openButton.style.display = "none";
+
+    // Retry welcome if autoplay was blocked
+    if (!welcomePlayed) {
+        await playWelcome();
+    }
 });
 
-// START
-startButton.addEventListener("click", () => {
+// START BUTTON
+startButton.addEventListener("click", async () => {
 
     setupAudio();
 
     warning.style.display = "none";
 
-    playSound(sounds.start);
+    await playSound(sounds.start);
 });
 
-// STOP
+// STOP BUTTON
 stopButton.addEventListener("click", async () => {
 
     setupAudio();
@@ -392,17 +387,18 @@ stopButton.addEventListener("click", async () => {
     await playSound(sounds.stop);
 
     warning.style.display = "flex";
-
     closeButton.style.display = "none";
 
     clearTimeout(warningTimer);
 
     warningTimer = setTimeout(() => {
+
         closeButton.style.display = "inline-block";
+
     }, 20000);
 });
 
-// CLOSE warning
+// CLOSE WARNING
 closeButton.addEventListener("click", () => {
 
     clearTimeout(warningTimer);
