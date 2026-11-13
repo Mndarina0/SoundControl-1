@@ -1,0 +1,400 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sound Control</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#00152e,#0754a5,#001d48);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 25px 0;
+    color: white;
+}
+
+.container {
+    width: 90%;
+    max-width: 430px;
+    text-align: center;
+}
+
+.subtitle {
+    color: #bce4ff;
+    letter-spacing: 2px;
+}
+
+h2 { margin: 20px 0; }
+
+.main-box {
+    background: rgba(255,255,255,.12);
+    border: 2px solid rgba(255,255,255,.3);
+    border-radius: 22px;
+    padding: 35px 20px;
+    cursor: pointer;
+    box-shadow: 0 0 35px #008cff4d;
+    transition: .25s;
+}
+
+.main-box:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0 45px #168cff;
+}
+
+.main-box h1 {
+    font-size: 35px;
+    margin: 0;
+}
+
+.controls {
+    display: none;
+    margin-top: 25px;
+    gap: 15px;
+}
+
+.controls.show { display: flex; }
+
+.btn {
+    flex: 1;
+    border: none;
+    padding: 17px 10px;
+    border-radius: 14px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+}
+
+.btn small {
+    display: block;
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+.start { background: #087bff; }
+.stop { background: #e62940; }
+
+.volume {
+    margin-top: 25px;
+    background: rgba(255,255,255,.10);
+    padding: 18px;
+    border-radius: 15px;
+}
+
+.volume input {
+    width: 100%;
+    margin-top: 12px;
+    accent-color: #16a0ff;
+}
+
+.volume span {
+    color: #8dffbd;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.warning {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #050000;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.warning.show { display: flex; }
+
+.warning-content {
+    width: 100%;
+    animation: flash .7s infinite alternate;
+}
+
+.warning-icon {
+    font-size: clamp(130px,30vw,280px);
+    color: red;
+    line-height: 1;
+    text-shadow: 0 0 35px red;
+}
+
+.warning h1 {
+    font-size: clamp(55px,13vw,130px);
+    color: red;
+    margin: 15px 0;
+    letter-spacing: 5px;
+}
+
+.warning h2 {
+    color: white;
+    font-size: clamp(20px,5vw,40px);
+}
+
+.warning p {
+    color: #ff3030;
+    font-size: clamp(22px,5vw,42px);
+    font-weight: bold;
+}
+
+@keyframes flash {
+    from { opacity: 1; }
+    to { opacity: .55; }
+}
+
+.close-warning {
+    display: none;
+    background: #e00000;
+    color: white;
+    border: 2px solid white;
+    border-radius: 12px;
+    padding: 15px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-warning.visible { display: inline-block; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="subtitle">🔊 SOUND CONTROL</div>
+
+    <h2>اضغط على الصندوق</h2>
+
+    <div class="main-box" id="mainBox">
+        <h1>📦 اضغط هنا</h1>
+    </div>
+
+    <div class="controls" id="controls">
+
+        <button class="btn stop" id="stopBtn">
+            ⏹ إيقاف
+            <small>STOP</small>
+        </button>
+
+        <button class="btn start" id="startBtn">
+            ▶ تشغيل
+            <small>START</small>
+        </button>
+
+    </div>
+
+    <div class="volume">
+        <div>🔊 مستوى الصوت</div>
+
+        <input type="range"
+               id="volume"
+               min="100"
+               max="200"
+               value="100">
+
+        <span id="volumeValue">100%</span>
+    </div>
+
+</div>
+
+<div class="warning" id="warning">
+    <div class="warning-content">
+
+        <div class="warning-icon">⚠</div>
+
+        <h1>WARNING</h1>
+
+        <h2>EXTREME CAUTION</h2>
+
+        <p>PLEASE BE CAREFUL!</p>
+
+        <button id="closeWarningBtn"
+                class="close-warning">
+            CLOSE
+        </button>
+
+    </div>
+</div>
+
+<audio id="audio" preload="auto"></audio>
+
+<script>
+
+// أصوات الموقع المشتركة لجميع الزوار
+const sounds = {
+    welcome: "sounds/welcome.mp3",
+    start: "sounds/start.mp3",
+    stop: "sounds/stop.mp3"
+};
+
+const audio = document.getElementById("audio");
+const warning = document.getElementById("warning");
+const controls = document.getElementById("controls");
+const volume = document.getElementById("volume");
+
+let audioContext = null;
+let audioSource = null;
+let audioGain = null;
+let warningTimer = null;
+
+function setupVolumeBoost() {
+    if (audioContext) return;
+
+    const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    audioContext = new AudioContextClass();
+
+    audioSource =
+        audioContext.createMediaElementSource(audio);
+
+    audioGain = audioContext.createGain();
+
+    audioSource.connect(audioGain);
+    audioGain.connect(audioContext.destination);
+
+    audio.volume = 1;
+    audioGain.gain.value = Number(volume.value) / 100;
+}
+
+async function unlockAudio() {
+    setupVolumeBoost();
+
+    if (audioContext &&
+        audioContext.state === "suspended") {
+        await audioContext.resume();
+    }
+}
+
+function playSound(soundPath) {
+    audio.pause();
+    audio.currentTime = 0;
+    audio.src = soundPath;
+    audio.volume = 1;
+
+    if (audioGain) {
+        audioGain.gain.value = Number(volume.value) / 100;
+    }
+
+    audio.play().catch(() => {
+        console.log("تعذر التشغيل، اضغط على الصفحة أولاً.");
+    });
+}
+
+// مستوى الصوت من 100 إلى 200
+const savedVolume = Number(
+    localStorage.getItem("savedBoost") || 100
+);
+
+volume.value = Math.max(100, Math.min(200, savedVolume));
+
+document.getElementById("volumeValue").textContent =
+    volume.value + "%";
+
+volume.addEventListener("input", function() {
+    const value = Math.max(100, Math.min(200, Number(this.value)));
+
+    this.value = value;
+
+    document.getElementById("volumeValue").textContent =
+        value + "%";
+
+    localStorage.setItem("savedBoost", value);
+
+    setupVolumeBoost();
+
+    if (audioGain) {
+        audioGain.gain.value = value / 100;
+    }
+});
+
+// فتح الصندوق
+document.getElementById("mainBox").onclick = function() {
+    controls.classList.add("show");
+};
+
+// تشغيل صوت START
+document.getElementById("startBtn").onclick = async function() {
+    await unlockAudio();
+
+    clearTimeout(warningTimer);
+
+    warning.classList.remove("show");
+
+    document.getElementById("closeWarningBtn")
+        .classList.remove("visible");
+
+    playSound(sounds.start);
+};
+
+// تشغيل صوت STOP وإظهار التحذير
+document.getElementById("stopBtn").onclick = async function() {
+    await unlockAudio();
+
+    playSound(sounds.stop);
+
+    warning.classList.add("show");
+
+    const closeBtn =
+        document.getElementById("closeWarningBtn");
+
+    closeBtn.classList.remove("visible");
+
+    clearTimeout(warningTimer);
+
+    warningTimer = setTimeout(function() {
+        closeBtn.classList.add("visible");
+    }, 20000);
+
+    if (!document.fullscreenElement) {
+        document.documentElement
+            .requestFullscreen?.()
+            .catch(() => {});
+    }
+};
+
+// إغلاق التحذير
+document.getElementById("closeWarningBtn").onclick = function() {
+    clearTimeout(warningTimer);
+
+    audio.pause();
+    audio.currentTime = 0;
+    audio.removeAttribute("src");
+    audio.load();
+
+    warning.classList.remove("show");
+
+    this.classList.remove("visible");
+
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+    }
+};
+
+// صوت الدخول
+window.addEventListener("load", function() {
+    playSound(sounds.welcome);
+});
+
+// محاولة تشغيل الصوت عند أول تفاعل إذا منع المتصفح التشغيل التلقائي
+document.addEventListener("pointerdown", function() {
+    if (audioContext && audioContext.state === "suspended") {
+        audioContext.resume();
+    }
+}, { once: true });
+
+</script>
+
+</body>
+</html>
